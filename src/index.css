@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+@theme {
+  --color-keyboard: #fcba29;
+  --font-main: "Hanken Grotesk", sans-serif;
+}
