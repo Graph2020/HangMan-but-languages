@@ -2,5 +2,10 @@
 
 @theme {
   --color-keyboard: #fcba29;
+  --color-secondary: #f9f4da;
   --font-main: "Hanken Grotesk", sans-serif;
+}
+
+@utility span-square {
+  @apply border-secondary text-secondary flex size-10 items-center justify-center border-b bg-[#323232] p-1 text-2xl;
 }
