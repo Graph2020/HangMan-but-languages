@@ -2,22 +2,34 @@ import { useState } from "react";
 import Win from "./components/Win";
 import { languages } from "./languages";
 import clsx from "clsx";
+import { getRandomWord } from "./utils";
+import ReactConfetti from "react-confetti";
 function App() {
   // States
-  const [currentWord, setCurrentWord] = useState("react");
+  const [currentWord, setCurrentWord] = useState(getRandomWord());
   const [usersLetters, setUsersLetters] = useState([]);
 
   // Derived
-
   const wrongGuessCount = usersLetters.filter(
     (letter) => !currentWord.includes(letter),
   ).length;
 
+  const isGameLost = wrongGuessCount === languages.length - 1;
+  const isGameWon = currentWord
+    .split("")
+    .every((letter) => usersLetters.includes(letter));
+
+  const isGameOver = isGameLost || isGameWon;
   // Functions
   function addLetter(letter) {
     setUsersLetters((prevLetters) =>
       prevLetters.includes(letter) ? prevLetters : [...prevLetters, letter],
     );
+  }
+
+  function resetGame() {
+    setCurrentWord(getRandomWord());
+    setUsersLetters([]);
   }
 
   // Static values
@@ -30,12 +42,16 @@ function App() {
     const isWrong = isGuessed && !isCorrect;
 
     const keyboardClass = clsx(
-      "size-8 rounded-sm border border-white p-1 text-black",
+      "size-8 cursor-pointer rounded-sm border border-white p-1 text-black",
       isCorrect ? "bg-green-400" : isWrong ? "bg-red-500" : "bg-yellow-500",
     );
 
     return (
-      <button onClick={() => addLetter(keyboard)} className={keyboardClass}>
+      <button
+        disabled={isGameOver}
+        onClick={() => addLetter(keyboard)}
+        className={keyboardClass}
+      >
         {keyboard.toUpperCase()}
       </button>
     );
@@ -45,7 +61,11 @@ function App() {
     .split("")
     .map((letter) => (
       <span className="span-square">
-        {usersLetters.includes(letter) ? letter.toUpperCase() : ""}
+        {isGameLost
+          ? letter.toUpperCase()
+          : usersLetters.includes(letter)
+            ? letter.toUpperCase()
+            : ""}
       </span>
     ));
 
@@ -71,7 +91,7 @@ function App() {
           from Assembly!
         </p>
       </div>
-      <Win />
+      <Win won={isGameWon} lost={isGameLost} mistakes={wrongGuessCount} />
       {/* languages  */}
       <div className="flex max-w-96 flex-wrap items-center justify-center gap-1">
         {displayLanguages}
@@ -82,9 +102,15 @@ function App() {
       <div className="flex max-w-96 flex-wrap justify-center gap-2">
         {keyboardButtons}
       </div>
-      <button className="rounded-sm bg-sky-500 px-8 py-2 text-black sm:px-10 md:px-12">
-        New Game
-      </button>
+      {isGameOver && (
+        <button
+          onClick={resetGame}
+          className="cursor-pointer rounded-sm bg-sky-500 px-8 py-2 text-black sm:px-10 md:px-12"
+        >
+          New Game
+        </button>
+      )}
+      {isGameWon && <ReactConfetti />}
     </main>
   );
 }
